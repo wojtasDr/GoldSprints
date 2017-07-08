@@ -34,15 +34,15 @@ public class RxTxCommunication implements SerialPortEventListener {
 	private Boolean isConnected = false;
 	private Boolean isEventListenerAvailable = false;
 	private String connectionStatus = "";
-	
+
 	private byte[] receivedBuffer = new byte[1024];
-    private int receivedBufferLen = -1;
-    private String receivedData = "";
+	private int receivedBufferLen = -1;
+	private String receivedData = "";
 	private StringBuffer receivedRevolution;
-	
+
 	private Float sensor1Velocity = 0.0f;
 	private List<Integer> sensor1Revolutions = new ArrayList<Integer>();
-	
+
 	private Utils u = new Utils();
 
 	public HashMap<String, CommPortIdentifier> listAvailablePorts() {
@@ -62,10 +62,10 @@ public class RxTxCommunication implements SerialPortEventListener {
 
 	public String connectWithCommPort(CommPortIdentifier selectedPortIdentifier) {
 		CommPort commPort = null;
-
+		
 		try {
-			commPort = selectedPortIdentifier.open("TigerControlPanel", CONNECTIONTIMEOUT);
-
+			commPort = selectedPortIdentifier.open("Arduino", CONNECTIONTIMEOUT);
+			
 			serialPort = (SerialPort) commPort;
 			serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 
@@ -85,10 +85,14 @@ public class RxTxCommunication implements SerialPortEventListener {
 
 	public String disconnect() {
 		try {
-			writeData(0, 0);
-			this.removeListener();
-
-			serialPort.close();
+			
+			if(getEventListenerFlag() == true){
+				this.removeListener();
+			}
+			
+			if (serialPort != null) {
+				serialPort.close();
+			}
 			
 			if (is != null) {
 				is.close();
@@ -103,6 +107,7 @@ public class RxTxCommunication implements SerialPortEventListener {
 			connectionStatus = "Disconnected.";
 		} catch (Exception e) {
 			connectionStatus = "Failed to close " + serialPort.getName() + "(" + e.toString() + ")";
+			e.printStackTrace();
 		}
 
 		return connectionStatus;
@@ -112,10 +117,8 @@ public class RxTxCommunication implements SerialPortEventListener {
 		boolean successful = false;
 
 		try {
-			//
 			is = serialPort.getInputStream();
 			os = serialPort.getOutputStream();
-			//writeData(0, 0);
 
 			successful = true;
 			return successful;
@@ -124,41 +127,39 @@ public class RxTxCommunication implements SerialPortEventListener {
 			return successful;
 		}
 	}
-	
-	public void resetReceivedData(){
+
+	public void resetReceivedData() {
 		receivedBuffer = new byte[1024];
-        receivedBufferLen = -1;
-        receivedData = "";
+		receivedBufferLen = -1;
+		receivedData = "";
 		receivedRevolution.setLength(0);
 	}
 
 	public void serialEvent(SerialPortEvent evt) {
-		if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE) {	
+		System.out.println("gggddddd");
+		if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			receivedBuffer = new byte[1024];
-            receivedBufferLen = -1;
-            receivedData = "";
-            receivedRevolution = new StringBuffer();
-            try
-            {
+			receivedBufferLen = -1;
+			receivedData = "";
+			receivedRevolution = new StringBuffer();
+			try {
 				while ((receivedBufferLen = this.is.read(receivedBuffer)) > -1 && getEventListenerFlag()) {
 					receivedData = new String(receivedBuffer, 0, receivedBufferLen);
-					if(!receivedData.isEmpty()){
+					if (!receivedData.isEmpty()) {
 						receivedRevolution.append(receivedData);
 
-						if(receivedRevolution.toString().contains("\n")){
+						if (receivedRevolution.toString().contains("\n")) {
 							sensor1Revolutions = u.collectData(receivedRevolution);
 							sensor1Velocity = u.countVelocity(sensor1Revolutions);
 							this.setSensor1Velocity(sensor1Velocity);
 							receivedRevolution.setLength(0);
-						} 
+						}
 					}
 
 				}
-            }
-            catch ( IOException e )
-            {
-                e.printStackTrace();
-            } 
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -171,10 +172,12 @@ public class RxTxCommunication implements SerialPortEventListener {
 			System.out.println("Too many listeners. (" + e.toString() + ")");
 		}
 	}
-	
+
 	public void removeListener() {
-		serialPort.removeEventListener();
-		
+		if (is != null) {
+			serialPort.removeEventListener();
+		}
+
 		try {
 			if (is != null) {
 				is.close();
@@ -187,43 +190,21 @@ public class RxTxCommunication implements SerialPortEventListener {
 			connectionStatus = "Failed to close streams " + "(" + e.toString() + ")";
 			e.printStackTrace();
 		}
-		
-		this.setEventListenerFlag(false);
+
 		this.resetReceivedData();
 		u.ResetData();
 		this.setEventListenerFlag(false);
 	}
 
-	public void writeData(int leftThrottle, int rightThrottle) {
-//		try
-//        {                
-//            int c = 0;
-//            while ( ( c = System.in.read()) > -1 )
-//            {
-//                this.os.write(c);
-//            }                
-//        }
-//        catch ( IOException e )
-//        {
-//            e.printStackTrace();
-//        }
-		
-		
-		
+	public void write(String send) {
+
 		try {
-			System.out.println("1111");
-			os.write(leftThrottle);
-			System.out.println("2222");
+			System.out.println("AAA");
+			os.write(send.getBytes());
+			System.out.println("BBB");
 			os.flush();
-			// this is a delimiter for the data
-			os.write(DASH_ASCII);
-			os.flush();
-			os.write(rightThrottle);
-			os.flush();
-			// will be read as a byte so it is a space key
-			os.write(SPACE_ASCII);
-			os.flush();
-		} catch (Exception e) {
+			System.out.println("CCC");
+		} catch (IOException e) {
 			System.out.println("Failed to write data. (" + e.toString() + ")");
 		}
 	}
@@ -235,7 +216,7 @@ public class RxTxCommunication implements SerialPortEventListener {
 	public void setConnected(boolean isConnected) {
 		this.isConnected = isConnected;
 	}
-	
+
 	final public boolean getEventListenerFlag() {
 		return isEventListenerAvailable;
 	}

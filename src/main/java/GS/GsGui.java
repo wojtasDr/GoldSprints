@@ -87,10 +87,12 @@ public class GsGui {
 					CommPortIdentifier selectedPortIdentifier = (CommPortIdentifier) availableCommPorts.get(selectedPort);
 					connectionStatus = rxTxComm.connectWithCommPort(selectedPortIdentifier);
 					commConnectButton.setText("Disconnect");
+					btnStart.setText("Start");
 					connStatus.setText(connectionStatus);
 				} else {
 					connectionStatus = rxTxComm.disconnect();
 					commConnectButton.setText("Connect");
+					btnStart.setText("Start");
 					connStatus.setText(connectionStatus);
 				}
 			}
@@ -98,24 +100,37 @@ public class GsGui {
 		commConnectButton.setBounds(40, 100, 97, 25);
 		frame.getContentPane().add(commConnectButton);
 
-		connStatus.setBounds(149, 100, 130, 25);
-
+		//Connection Status label
+		connStatus.setBounds(149, 100, 271, 51);
 		frame.getContentPane().add(connStatus);
 		
+		//Button Start/Stop
 		btnStart.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 
-				if (rxTxComm.getEventListenerFlag() == false) {
-					if (rxTxComm.getConnected() == true) {
+//				if (rxTxComm.getEventListenerFlag() == false) {
+//					if (rxTxComm.getConnected() == true) {
+//						if (rxTxComm.initIOStream() == true) {
+//							rxTxComm.addListener();
+//							btnStart.setText("Stop");
+//						}
+//					}
+//				} else {
+//					rxTxComm.removeListener();
+//					btnStart.setText("Start");
+//				}
+				
+				if (rxTxComm.getConnected() == true) {
+					if (rxTxComm.getEventListenerFlag() == false) {
 						if (rxTxComm.initIOStream() == true) {
 							rxTxComm.addListener();
 							btnStart.setText("Stop");
 						}
+					} else {
+						rxTxComm.removeListener();
+						btnStart.setText("Start");						
 					}
-				} else {
-					rxTxComm.removeListener();
-					btnStart.setText("Start");
 				}
 			}
 		});

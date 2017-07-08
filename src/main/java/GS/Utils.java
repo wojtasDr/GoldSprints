@@ -9,11 +9,11 @@ public class Utils {
 	private List<Integer> sensorRevolutions = new ArrayList<Integer>();
 	
 	public List<Integer> collectData(StringBuffer revolutions){
-		System.out.println("Rev: " + revolutions);
+		System.out.println("Revvv: " + revolutions);
 		//System.out.println("Rev number:" + revolutions.substring(revolutions.indexOf(":")+1, revolutions.length()).trim());
 
 		Integer revNumber = Integer.parseInt(revolutions.substring(revolutions.indexOf(":") + 1, revolutions.length()).trim());
-
+		System.out.println("revNumber:" + revNumber);
 		if(sensorRevolutions.size() == 5){
 			sensorRevolutions.remove(measurementCounter);
 		}
