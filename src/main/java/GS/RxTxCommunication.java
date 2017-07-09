@@ -118,8 +118,8 @@ public class RxTxCommunication implements SerialPortEventListener {
 
 		try {
 			is = serialPort.getInputStream();
-			os = serialPort.getOutputStream();
-
+			//os = serialPort.getOutputStream();
+			
 			successful = true;
 			return successful;
 		} catch (IOException e) {
@@ -132,11 +132,10 @@ public class RxTxCommunication implements SerialPortEventListener {
 		receivedBuffer = new byte[1024];
 		receivedBufferLen = -1;
 		receivedData = "";
-		receivedRevolution.setLength(0);
+		receivedRevolution = new StringBuffer();
 	}
 
 	public void serialEvent(SerialPortEvent evt) {
-		System.out.println("gggddddd");
 		if (evt.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
 			receivedBuffer = new byte[1024];
 			receivedBufferLen = -1;
@@ -152,7 +151,7 @@ public class RxTxCommunication implements SerialPortEventListener {
 							sensor1Revolutions = u.collectData(receivedRevolution);
 							sensor1Velocity = u.countVelocity(sensor1Revolutions);
 							this.setSensor1Velocity(sensor1Velocity);
-							receivedRevolution.setLength(0);
+							receivedRevolution = new StringBuffer();
 						}
 					}
 
@@ -197,17 +196,34 @@ public class RxTxCommunication implements SerialPortEventListener {
 	}
 
 	public void write(String send) {
-
 		try {
-			System.out.println("AAA");
-			os.write(send.getBytes());
-			System.out.println("BBB");
+			os = serialPort.getOutputStream();
+			
+			for (Byte b : send.getBytes()){
+				os.write(b);
+			}
+
 			os.flush();
-			System.out.println("CCC");
+
 		} catch (IOException e) {
 			System.out.println("Failed to write data. (" + e.toString() + ")");
 		}
 	}
+	
+//	public void write(char send) {
+//		//System.out.println("Write " + send + " to serial.");
+//		try {
+//			os = serialPort.getOutputStream();
+//			
+//			os.write(send);
+//
+//			//System.out.println("Sent bytes: " + send);
+//			os.flush();
+//
+//		} catch (IOException e) {
+//			System.out.println("Failed to write data. (" + e.toString() + ")");
+//		}
+//	}
 
 	final public boolean getConnected() {
 		return isConnected;

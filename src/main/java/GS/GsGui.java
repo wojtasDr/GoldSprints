@@ -90,6 +90,7 @@ public class GsGui {
 					btnStart.setText("Start");
 					connStatus.setText(connectionStatus);
 				} else {
+					rxTxComm.write("F");
 					connectionStatus = rxTxComm.disconnect();
 					commConnectButton.setText("Connect");
 					btnStart.setText("Start");
@@ -108,26 +109,15 @@ public class GsGui {
 		btnStart.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-
-//				if (rxTxComm.getEventListenerFlag() == false) {
-//					if (rxTxComm.getConnected() == true) {
-//						if (rxTxComm.initIOStream() == true) {
-//							rxTxComm.addListener();
-//							btnStart.setText("Stop");
-//						}
-//					}
-//				} else {
-//					rxTxComm.removeListener();
-//					btnStart.setText("Start");
-//				}
-				
 				if (rxTxComm.getConnected() == true) {
 					if (rxTxComm.getEventListenerFlag() == false) {
 						if (rxTxComm.initIOStream() == true) {
 							rxTxComm.addListener();
+							rxTxComm.write("T");
 							btnStart.setText("Stop");
 						}
 					} else {
+						rxTxComm.write("F");
 						rxTxComm.removeListener();
 						btnStart.setText("Start");						
 					}
