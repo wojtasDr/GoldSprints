@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Observable;
 import java.util.TooManyListenersException;
 
 import gnu.io.CommPort;
@@ -16,7 +17,7 @@ import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
-public class RxTxCommunication implements SerialPortEventListener {
+public class RxTxCommunication extends Observable implements SerialPortEventListener {
 
 	private InputStream is = null;
 	private OutputStream os = null;
@@ -209,21 +210,6 @@ public class RxTxCommunication implements SerialPortEventListener {
 			System.out.println("Failed to write data. (" + e.toString() + ")");
 		}
 	}
-	
-//	public void write(char send) {
-//		//System.out.println("Write " + send + " to serial.");
-//		try {
-//			os = serialPort.getOutputStream();
-//			
-//			os.write(send);
-//
-//			//System.out.println("Sent bytes: " + send);
-//			os.flush();
-//
-//		} catch (IOException e) {
-//			System.out.println("Failed to write data. (" + e.toString() + ")");
-//		}
-//	}
 
 	final public boolean getConnected() {
 		return isConnected;
@@ -247,5 +233,7 @@ public class RxTxCommunication implements SerialPortEventListener {
 
 	public void setSensor1Velocity(Float sensor1Velocity) {
 		this.sensor1Velocity = sensor1Velocity;
+		setChanged();
+		notifyObservers(this.sensor1Velocity);
 	}
 }

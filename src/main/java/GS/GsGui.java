@@ -10,7 +10,10 @@ import javax.swing.JComboBox;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.awt.event.ActionEvent;
 import javax.swing.JButton;
@@ -19,8 +22,10 @@ import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
+import javax.swing.JTextField;
+import javax.swing.JProgressBar;
 
-public class GsGui {
+public class GsGui implements Observer{
 
 	private JFrame frame;
 
@@ -35,6 +40,8 @@ public class GsGui {
 	private JButton commConnectButton = new JButton("Connect");
 	private final JLabel connStatus = new JLabel("");
 	private final JButton btnStart = new JButton("Start");
+	private JLabel velocity = new JLabel("0.0");
+	private JTextField distanceTextField;
 	
 	/**
 	 * Launch the application.
@@ -44,6 +51,7 @@ public class GsGui {
 			public void run() {
 				try {
 					GsGui window = new GsGui();
+
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -57,7 +65,7 @@ public class GsGui {
 	 */
 	public GsGui() {
 		rxTxComm = new RxTxCommunication();
-		
+		//rxTxComm.addObserver(this);
 		this.initialize();
 	}
 
@@ -69,7 +77,7 @@ public class GsGui {
 		
 		
 		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
+		frame.setBounds(100, 100, 812, 572);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
@@ -92,8 +100,10 @@ public class GsGui {
 				} else {
 					rxTxComm.write("F");
 					connectionStatus = rxTxComm.disconnect();
+					rxTxComm.deleteObserver(GsGui.this);
 					commConnectButton.setText("Connect");
 					btnStart.setText("Start");
+					velocity.setText("0.0 km/h");
 					connStatus.setText(connectionStatus);
 				}
 			}
@@ -105,6 +115,11 @@ public class GsGui {
 		connStatus.setBounds(149, 100, 271, 51);
 		frame.getContentPane().add(connStatus);
 		
+		btnStart.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		
 		//Button Start/Stop
 		btnStart.addMouseListener(new MouseAdapter() {
 			@Override
@@ -112,22 +127,53 @@ public class GsGui {
 				if (rxTxComm.getConnected() == true) {
 					if (rxTxComm.getEventListenerFlag() == false) {
 						if (rxTxComm.initIOStream() == true) {
+							rxTxComm.addObserver(GsGui.this);
 							rxTxComm.addListener();
 							rxTxComm.write("T");
 							btnStart.setText("Stop");
 						}
 					} else {
 						rxTxComm.write("F");
+						rxTxComm.deleteObserver(GsGui.this);
 						rxTxComm.removeListener();
-						btnStart.setText("Start");						
+						btnStart.setText("Start");	
+						velocity.setText("0.0 km/h");
 					}
 				}
 			}
 		});
 		
-		btnStart.setBounds(182, 182, 97, 25);
+		btnStart.setBounds(40, 179, 97, 25);
 		frame.getContentPane().add(btnStart);
 		
+		velocity = new JLabel("0.0 km/h");
+		velocity.setBounds(54, 281, 74, 33);
+		
+		frame.getContentPane().add(velocity);
+		
+		distanceTextField = new JTextField();
+		distanceTextField.setText("200");
+		distanceTextField.setBounds(68, 387, 38, 33);
+		frame.getContentPane().add(distanceTextField);
+		distanceTextField.setColumns(10);
+		
+		final JProgressBar distanceProgressBar = new JProgressBar();
+		distanceProgressBar.addPropertyChangeListener(new PropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent evt) {
+				distanceProgressBar.setMaximum(Integer.parseInt(distanceTextField.getText()));
+				
+				System.out.println(distanceProgressBar.getMaximum());
+			}
+		});
+		distanceProgressBar.setBounds(56, 468, 376, 22);
+		frame.getContentPane().add(distanceProgressBar);
+	}
+	
+	
+	public void update(Observable o, Object arg) {
+		System.out.println("Vupdate: " + rxTxComm.getSensor1Velocity().toString());
+		//velocity.setText(rxTxComm.getSensor1Velocity().toString());
+		velocity.setText(String.format(Locale.ROOT, "%.1f",Double.parseDouble(rxTxComm.getSensor1Velocity().toString())) + " km/h");
 	}
 	
 	/**

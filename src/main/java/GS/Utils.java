@@ -9,11 +9,8 @@ public class Utils {
 	private List<Integer> sensorRevolutions = new ArrayList<Integer>();
 	
 	public List<Integer> collectData(StringBuffer revolutions){
-		//System.out.println("Revvv: " + revolutions);
-		//System.out.println("Rev number:" + revolutions.substring(revolutions.indexOf(":")+1, revolutions.length()).trim());
-
 		Integer revNumber = Integer.parseInt(revolutions.substring(revolutions.indexOf(":") + 1, revolutions.length()).trim());
-		//System.out.println("revNumber:" + revNumber);
+
 		if(sensorRevolutions.size() == 5){
 			sensorRevolutions.remove(measurementCounter);
 		}
@@ -29,11 +26,12 @@ public class Utils {
 	}
 	
 	public Float countVelocity(List<Integer> revolutionsList){
-		if (revolutionsList.size() >= 5) {
+		Float sum = 0.0f;
+		if (revolutionsList.size() == 5) {
 			for (Integer rev : revolutionsList) {
-				velocity = velocity + (rev * 2.1f * 3.6f);
+				sum = sum + (rev * 2.1f * 3.6f);
 			}
-			velocity = velocity / 5;
+			velocity = sum / 5;
 		}
 		
 		System.out.println("V1: " + velocity + "km/h");
