@@ -151,6 +151,7 @@ public class RxTxCommunication extends Observable implements SerialPortEventList
 						if (receivedRevolution.toString().contains("\n")) {
 							sensor1Revolutions = u.collectData(receivedRevolution);
 							sensor1Velocity = u.countVelocity(sensor1Revolutions);
+							//this.setReceivedRevolutions(receivedRevolution);
 							this.setSensor1Velocity(sensor1Velocity);
 							receivedRevolution = new StringBuffer();
 						}
@@ -209,6 +210,14 @@ public class RxTxCommunication extends Observable implements SerialPortEventList
 		} catch (IOException e) {
 			System.out.println("Failed to write data. (" + e.toString() + ")");
 		}
+	}
+	
+	public void setRevolutions(StringBuffer revs){
+		u.setRevolutions(revs);
+	}
+	
+	public Integer getRevolutions (){
+		return u.getRevolutions();
 	}
 
 	final public boolean getConnected() {

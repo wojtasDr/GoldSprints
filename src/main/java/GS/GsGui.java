@@ -24,12 +24,19 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeEvent;
 import javax.swing.JTextField;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollBar;
+import javax.swing.DefaultComboBoxModel;
 
 public class GsGui implements Observer{
 
+	private float totalDistance = 0.0f;
+	private float distance = 0.0f;
+	private Integer numberOfRevolutions = 0;
+	
 	private JFrame frame;
 
 	private RxTxCommunication rxTxComm;
+	private Utils u;
 	
 	private HashMap<String,CommPortIdentifier> availableCommPorts = new HashMap<String,CommPortIdentifier> ();
 	
@@ -41,7 +48,8 @@ public class GsGui implements Observer{
 	private final JLabel connStatus = new JLabel("");
 	private final JButton btnStart = new JButton("Start");
 	private JLabel velocity = new JLabel("0.0");
-	private JTextField distanceTextField;
+	private JComboBox<Integer> distanceComboBox = new JComboBox();
+	private final JProgressBar distanceProgressBar = new JProgressBar();
 	
 	/**
 	 * Launch the application.
@@ -65,7 +73,7 @@ public class GsGui implements Observer{
 	 */
 	public GsGui() {
 		rxTxComm = new RxTxCommunication();
-		//rxTxComm.addObserver(this);
+		u = new Utils();
 		this.initialize();
 	}
 
@@ -138,6 +146,10 @@ public class GsGui implements Observer{
 						rxTxComm.removeListener();
 						btnStart.setText("Start");	
 						velocity.setText("0.0 km/h");
+						
+						totalDistance = 0.0f;
+						distance = 0.0f;
+						numberOfRevolutions = 0;
 					}
 				}
 			}
@@ -146,34 +158,41 @@ public class GsGui implements Observer{
 		btnStart.setBounds(40, 179, 97, 25);
 		frame.getContentPane().add(btnStart);
 		
+		//Velocity Label
 		velocity = new JLabel("0.0 km/h");
 		velocity.setBounds(54, 281, 74, 33);
-		
 		frame.getContentPane().add(velocity);
 		
-		distanceTextField = new JTextField();
-		distanceTextField.setText("200");
-		distanceTextField.setBounds(68, 387, 38, 33);
-		frame.getContentPane().add(distanceTextField);
-		distanceTextField.setColumns(10);
+		//Distance ProgressBar
+		distanceProgressBar.setBounds(56, 468, 376, 22);
+		frame.getContentPane().add(distanceProgressBar);
 		
-		final JProgressBar distanceProgressBar = new JProgressBar();
-		distanceProgressBar.addPropertyChangeListener(new PropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent evt) {
-				distanceProgressBar.setMaximum(Integer.parseInt(distanceTextField.getText()));
-				
+		
+		//Distance ComboBox
+		distanceComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				distanceProgressBar.setMaximum((Integer) distanceComboBox.getSelectedItem());
+
 				System.out.println(distanceProgressBar.getMaximum());
 			}
 		});
-		distanceProgressBar.setBounds(56, 468, 376, 22);
-		frame.getContentPane().add(distanceProgressBar);
+		
+		distanceComboBox.setModel(new DefaultComboBoxModel<Integer>(new Integer[] {50, 100, 150, 200, 250, 300, 350, 400, 450, 500}));
+		distanceComboBox.setSelectedIndex(5);
+		
+		distanceComboBox.setBounds(54, 373, 48, 33);
+		frame.getContentPane().add(distanceComboBox);
 	}
 	
-	
 	public void update(Observable o, Object arg) {
-		System.out.println("Vupdate: " + rxTxComm.getSensor1Velocity().toString());
-		//velocity.setText(rxTxComm.getSensor1Velocity().toString());
-		velocity.setText(String.format(Locale.ROOT, "%.1f",Double.parseDouble(rxTxComm.getSensor1Velocity().toString())) + " km/h");
+		numberOfRevolutions = rxTxComm.getRevolutions();
+		//System.out.println("Revs number: " + numberOfRevolutions);
+		distance = u.countDistance(numberOfRevolutions);
+		totalDistance = u.countTotalDistance(distance, totalDistance);
+		System.out.println("Total Distance: " + totalDistance + " m");
+		//System.out.println("Vupdate: " + rxTxComm.getSensor1Velocity().toString());
+		velocity.setText(String.format(Locale.ROOT, "%.1f", Double.parseDouble(rxTxComm.getSensor1Velocity().toString())) + " km/h");
+
 	}
 	
 	/**
