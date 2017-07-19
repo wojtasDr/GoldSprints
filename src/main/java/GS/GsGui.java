@@ -52,6 +52,11 @@ import net.miginfocom.swing.MigLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import com.jgoodies.forms.layout.FormSpecs;
+import javax.swing.Box;
+import java.awt.Panel;
+import javax.swing.JSeparator;
+import java.awt.Canvas;
+import javax.swing.LayoutStyle.ComponentPlacement;
 
 public class GsGui implements Observer{
 
@@ -77,6 +82,8 @@ public class GsGui implements Observer{
 	private JComboBox<Integer> distanceComboBox = new JComboBox();
 	private Radial c1Gauge;
 	private Radial c2Gauge;
+	private final JPanel panel_1 = new JPanel();
+	private final JPanel panel_2 = new JPanel();
 	
 	/**
 	 * Launch the application.
@@ -111,48 +118,46 @@ public class GsGui implements Observer{
 		//Initialize GUI objects
 		
 		frame = new JFrame();
-		frame.setBounds(100, 100, 812, 572);
+		frame.setBounds(100, 100, 582, 726);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		//comPorts ComboBox
 		this.fillInComboBoxWithCommPorts();
-		commPorts.setBounds(29, 36, 188, 22);
-		frame.getContentPane().add(commPorts);
 		
 		//Radial c1Gauge
 		JPanel panel = new JPanel();
-		panel.setBounds(502, 54, 200, 200);
+		panel.setBounds(80, 250, 400, 400);
 		frame.getContentPane().add(panel);
 
 		c1Gauge = new Radial();
 		c1Gauge.setUnitString("m");
+		c1Gauge.setTitle("");
 		c1Gauge.setLcdVisible(false);
 		c1Gauge.setLedVisible(false);
-		c1Gauge.setOpaque(true);
+		c1Gauge.setOpaque(false);
 
 		c2Gauge = new Radial();
-		c2Gauge.setUnitString("m");
-		c2Gauge.setTitle("");
 		c2Gauge.setPointerColor(ColorDef.BLUE);
-		c2Gauge.setTickmarkColorFromThemeEnabled(false);
-		c2Gauge.setBorder(null);
+		c2Gauge.setUnitString("");
+		c2Gauge.setTitle("");
+		//c2Gauge.setTickmarkColorFromThemeEnabled(false);
+		//c2Gauge.setBorder(null);
 		c2Gauge.setBackgroundVisible(false);
 		c2Gauge.setTickmarksVisible(false);
 		c2Gauge.setTicklabelsVisible(false);
 		c2Gauge.setMinorTickmarkVisible(false);
-		c2Gauge.setLabelColorFromThemeEnabled(false);
+		//c2Gauge.setLabelColorFromThemeEnabled(false);
 		c2Gauge.setLcdVisible(false);
 		c2Gauge.setLedVisible(false);
-
 		c2Gauge.setFrameVisible(false);
-		c2Gauge.setTitleAndUnitFontEnabled(false);
+		//c2Gauge.setTitleAndUnitFontEnabled(false);
 
 		c2Gauge.setCustomLayerVisible(false);
-		c2Gauge.setCustomLcdUnitFontEnabled(false);
-		c2Gauge.setCustomTickmarkLabelsEnabled(false);
-		c2Gauge.setDigitalFont(false);
-		c2Gauge.setDoubleBuffered(false);
+		//c2Gauge.setCustomLcdUnitFontEnabled(false);
+		//c2Gauge.setCustomTickmarkLabelsEnabled(false);
+		//c2Gauge.setDigitalFont(false);
+		//c2Gauge.setDoubleBuffered(false);
 		c2Gauge.setForegroundVisible(false);
 		c2Gauge.setFrame3dEffectVisible(false);
 		c2Gauge.setMajorTickmarkVisible(false);
@@ -165,19 +170,103 @@ public class GsGui implements Observer{
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addComponent(c2Gauge, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addComponent(c1Gauge, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-
+				.addComponent(c2Gauge, GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+				.addComponent(c1Gauge, GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
 		);
-		gl_panel.setVerticalGroup(
+		gl_panel.setVerticalGroup(				
 			gl_panel.createParallelGroup(Alignment.LEADING)
-				.addComponent(c2Gauge, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-				.addComponent(c1Gauge, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-
+			.addComponent(c2Gauge, GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
+			.addComponent(c1Gauge, GroupLayout.DEFAULT_SIZE, 400, Short.MAX_VALUE)
 		);
 		panel.setLayout(gl_panel);
+		panel_1.setBounds(25, 13, 297, 188);
+		
+		frame.getContentPane().add(panel_1);
+		panel_1.setLayout(null);
+		commPorts.setBounds(35, 15, 96, 22);
+		panel_1.add(commPorts);
+		commConnectButton.setBounds(156, 14, 97, 25);
+		panel_1.add(commConnectButton);
+		connStatus.setBounds(12, 53, 271, 113);
+		panel_1.add(connStatus);
+		panel_2.setBounds(331, 13, 200, 94);
+		
+		frame.getContentPane().add(panel_2);
+		panel_2.setLayout(null);
+		btnStart.setBounds(12, 13, 176, 25);
+		panel_2.add(btnStart);
+		distanceComboBox.setBounds(127, 51, 61, 31);
+		panel_2.add(distanceComboBox);
 		
 		
+		//Distance ComboBox
+		distanceComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				c1Gauge.setMaxValue((Integer) distanceComboBox.getSelectedItem());
+				c2Gauge.setMaxValue((Integer) distanceComboBox.getSelectedItem());
+			}
+		});
+		
+		distanceComboBox.setModel(new DefaultComboBoxModel<Integer>(new Integer[] {50, 100, 150, 200, 250, 300, 350, 400, 450, 500}));
+		distanceComboBox.setSelectedIndex(5);
+		
+		JLabel lblNewLabel = new JLabel("Distance [m]:");
+		lblNewLabel.setBounds(12, 51, 78, 25);
+		panel_2.add(lblNewLabel);
+		
+		JPanel panel_3 = new JPanel();
+		panel_3.setBounds(334, 108, 200, 94);
+		frame.getContentPane().add(panel_3);
+		panel_3.setLayout(null);
+		
+		JLabel lblNewLabel_1 = new JLabel("Velocity1:");
+		lblNewLabel_1.setBounds(12, 13, 99, 21);
+		panel_3.add(lblNewLabel_1);
+		
+		//Velocity Label
+		velocity = new JLabel("0.0 km/h");
+		velocity.setBounds(114, 7, 74, 33);
+		panel_3.add(velocity);
+		
+		JLabel lblVelocity = new JLabel("Velocity2:");
+		lblVelocity.setBounds(12, 54, 56, 16);
+		panel_3.add(lblVelocity);
+		
+		btnStart.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		
+		// Button Start/Stop
+		btnStart.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (rxTxComm.getConnected() == true) {
+					if (rxTxComm.getEventListenerFlag() == false) {
+						if (rxTxComm.initIOStream() == true) {
+							rxTxComm.addObserver(GsGui.this);
+							rxTxComm.addListener();
+							rxTxComm.write("T");
+							btnStart.setText("Stop");
+						}
+					} else {
+						rxTxComm.write("F");
+						rxTxComm.deleteObserver(GsGui.this);
+						rxTxComm.removeListener();
+						btnStart.setText("Start");
+						velocity.setText("0.0 km/h");
+
+						totalDistance = 0.0f;
+						distance = 0.0f;
+						numberOfRevolutions = 0;
+						
+						c1Gauge.setValue(totalDistance);
+						c2Gauge.setValue(totalDistance);
+					}
+				}
+			}
+		});
+
 		//commConnectButton
 		commConnectButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -201,72 +290,12 @@ public class GsGui implements Observer{
 					totalDistance = 0.0f;
 					distance = 0.0f;
 					numberOfRevolutions = 0;
+					
+					c1Gauge.setValue(totalDistance);
+					c2Gauge.setValue(totalDistance);
 				}
 			}
 		});
-		commConnectButton.setBounds(40, 100, 97, 25);
-		frame.getContentPane().add(commConnectButton);
-
-		//Connection Status label
-		connStatus.setBounds(149, 100, 271, 51);
-		frame.getContentPane().add(connStatus);
-		
-		btnStart.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
-
-        
-		//Button Start/Stop
-		btnStart.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				if (rxTxComm.getConnected() == true) {
-					if (rxTxComm.getEventListenerFlag() == false) {
-						if (rxTxComm.initIOStream() == true) {
-							rxTxComm.addObserver(GsGui.this);
-							rxTxComm.addListener();
-							rxTxComm.write("T");
-							btnStart.setText("Stop");
-						}
-					} else {
-						rxTxComm.write("F");
-						rxTxComm.deleteObserver(GsGui.this);
-						rxTxComm.removeListener();
-						btnStart.setText("Start");	
-						velocity.setText("0.0 km/h");
-						
-						totalDistance = 0.0f;
-						distance = 0.0f;
-						numberOfRevolutions = 0;
-					}
-				}
-			}
-		});
-		
-		btnStart.setBounds(40, 179, 97, 25);
-		frame.getContentPane().add(btnStart);
-		
-		//Velocity Label
-		velocity = new JLabel("0.0 km/h");
-		velocity.setBounds(54, 281, 74, 33);
-		frame.getContentPane().add(velocity);
-		
-		
-		//Distance ComboBox
-		distanceComboBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				c1Gauge.setMaxValue((Integer) distanceComboBox.getSelectedItem());
-				c2Gauge.setMaxValue((Integer) distanceComboBox.getSelectedItem());
-			}
-		});
-		
-		distanceComboBox.setModel(new DefaultComboBoxModel<Integer>(new Integer[] {50, 100, 150, 200, 250, 300, 350, 400, 450, 500}));
-		distanceComboBox.setSelectedIndex(5);
-		
-		distanceComboBox.setBounds(54, 373, 48, 33);
-		frame.getContentPane().add(distanceComboBox);
-		
 	}
 	
 	public void update(Observable o, Object arg) {
@@ -274,10 +303,30 @@ public class GsGui implements Observer{
 		distance = u.countDistance(numberOfRevolutions);
 		totalDistance = u.countTotalDistance(distance, totalDistance);
 		System.out.println("Total Distance: " + totalDistance + " m");
-		c1Gauge.setValue(totalDistance);
-		c2Gauge.setValue(totalDistance +10);
-		velocity.setText(String.format(Locale.ROOT, "%.1f", Double.parseDouble(rxTxComm.getSensor1Velocity().toString())) + " km/h");
+		
+		System.out.println("Distance " + (Integer)distanceComboBox.getSelectedItem());
+		if(totalDistance > 0){
+		if(totalDistance <= (Integer)distanceComboBox.getSelectedItem() || totalDistance <= (Integer)distanceComboBox.getSelectedItem()){
+			c1Gauge.setValue(totalDistance);
+			c2Gauge.setValue(totalDistance +10);
+		}
+//		else {
+//			rxTxComm.write("F");
+//			rxTxComm.deleteObserver(GsGui.this);
+//			rxTxComm.removeListener();
+//			btnStart.setText("Start");
+//			velocity.setText("0.0 km/h");
+//
+//			totalDistance = 0.0f;
+//			distance = 0.0f;
+//			numberOfRevolutions = 0;
+//			
+//			c1Gauge.setValue(totalDistance);
+//			c2Gauge.setValue(totalDistance);
+//		}
+		}
 
+		velocity.setText(String.format(Locale.ROOT, "%.1f", Double.parseDouble(rxTxComm.getSensor1Velocity().toString())) + " km/h");
 	}
 	
 	/**
